@@ -1,4 +1,4 @@
-import 'package:firebase_getx_boilerplate/app/pages/root/controller.dart';
+import 'package:hyshare/app/pages/root/controller.dart';
 import 'package:get/get.dart';
 
 class RootPageBinding implements Bindings {

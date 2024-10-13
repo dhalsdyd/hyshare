@@ -1,18 +1,17 @@
-import 'package:firebase_getx_boilerplate/app/core/theme/color_theme.dart';
-import 'package:firebase_getx_boilerplate/app/core/theme/text_theme.dart';
-import 'package:firebase_getx_boilerplate/app/widgets/button.dart';
+import 'package:hyshare/app/core/theme/color_theme.dart';
+import 'package:hyshare/app/core/theme/text_theme.dart';
+import 'package:hyshare/app/widgets/button.dart';
 import 'package:flutter/material.dart';
 
 class FGBPDialogAction {
   final String title;
   final void Function()? onTap;
   final bool isHighlighted;
-  FGBPDialogAction(
-      {required this.title, this.onTap, this.isHighlighted = false});
+  FGBPDialogAction({required this.title, this.onTap, this.isHighlighted = false});
 }
 
 class FGBPDialogActionButton extends StatelessWidget {
-  const FGBPDialogActionButton(this.action, {Key? key}) : super(key: key);
+  const FGBPDialogActionButton(this.action, {super.key});
   final FGBPDialogAction action;
 
   @override
@@ -27,11 +26,11 @@ class FGBPDialogActionButton extends StatelessWidget {
 
 class FGBPDialog extends StatelessWidget {
   const FGBPDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     required this.actions,
-  }) : super(key: key);
+  });
 
   final String title;
   final String content;
@@ -41,8 +40,7 @@ class FGBPDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(

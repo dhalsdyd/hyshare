@@ -1,10 +1,15 @@
-import 'package:firebase_getx_boilerplate/app/data/controllers/lifecycle.dart';
 import 'package:get/get.dart';
+import 'package:hyshare/app/data/module/chat/module.dart';
+import 'package:hyshare/app/data/module/ride/module.dart';
+import 'package:hyshare/app/data/service/auth/service.dart';
 
 class AppInitalizer {
   Future<void> init() async {
-    Get.put<LifeCycleController>(LifeCycleController());
-    // await Get.putAsync<DatabaseController>(() => DatabaseController().init());
-    // await Get.putAsync<AuthController>(() => AuthController().init());
+    await Future.wait([
+      Get.putAsync(() => AuthService().init()),
+    ]);
+
+    Get.put(RideModule());
+    Get.put(ChatModule());
   }
 }

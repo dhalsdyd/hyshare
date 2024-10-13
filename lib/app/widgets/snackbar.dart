@@ -1,4 +1,4 @@
-import 'package:firebase_getx_boilerplate/app/core/theme/color_theme.dart';
+import 'package:hyshare/app/core/theme/color_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,13 +9,7 @@ class FGBPSnackBar {
     Color textColor = Colors.white,
   }) {
     Get.rawSnackbar(
-      titleText: Text(title,
-          style: TextStyle(
-              fontFamily: 'Pretendard',
-              fontWeight: FontWeight.w500,
-              fontSize: 16,
-              height: 1,
-              color: textColor)),
+      titleText: Text(title, style: TextStyle(fontFamily: 'Pretendard', fontWeight: FontWeight.w500, fontSize: 16, height: 1, color: textColor)),
       messageText: Container(),
       backgroundColor: backgroundColor,
       borderRadius: 12,
@@ -30,7 +24,7 @@ class FGBPErrorSnackBar {
   void open(String title, {String? message}) {
     FGBPSnackBar.open(
       title,
-      backgroundColor: FGBPColors.grey,
+      backgroundColor: Colors.red,
       textColor: Colors.white,
     );
   }

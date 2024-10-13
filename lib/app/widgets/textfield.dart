@@ -1,5 +1,6 @@
-import 'package:firebase_getx_boilerplate/app/core/theme/color_theme.dart';
-import 'package:firebase_getx_boilerplate/app/core/theme/text_theme.dart';
+import 'package:get/get.dart';
+import 'package:hyshare/app/core/theme/color_theme.dart';
+import 'package:hyshare/app/core/theme/text_theme.dart';
 import 'package:flutter/material.dart';
 
 class FGBPTextField extends StatelessWidget {
@@ -16,7 +17,7 @@ class FGBPTextField extends StatelessWidget {
   final bool? enableInteractiveSelection;
 
   const FGBPTextField({
-    Key? key,
+    super.key,
     this.label,
     this.hintText,
     this.controller,
@@ -28,18 +29,20 @@ class FGBPTextField extends StatelessWidget {
     this.enableInteractiveSelection,
     this.autofocus = false,
     this.isPassword = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    Color color = context.isDarkMode ? Colors.white : Colors.black;
+
     return TextField(
       enableInteractiveSelection: enableInteractiveSelection,
       obscureText: isPassword,
       enableSuggestions: !isPassword,
       autocorrect: !isPassword,
       autofocus: autofocus,
-      style: FGBPTextTheme.regular20,
-      cursorColor: Colors.black,
+      style: FGBPTextTheme.semiboldGrey16.copyWith(color: color),
+      cursorColor: color,
       keyboardType: textInputType,
       maxLength: maxLength,
       controller: controller,
@@ -57,13 +60,9 @@ class FGBPTextField extends StatelessWidget {
           ),
         ),
         counterText: "",
-        fillColor: FGBPColors.black,
         filled: true,
-        hintStyle: FGBPTextTheme.regular20,
-        floatingLabelStyle: const TextStyle(
-            color: Color.fromRGBO(0, 0, 0, 0.4),
-            fontWeight: FontWeight.w500,
-            fontSize: 12),
+        hintStyle: FGBPTextTheme.semiboldGrey16.copyWith(color: color),
+        floatingLabelStyle: const TextStyle(color: Color.fromRGBO(0, 0, 0, 0.4), fontWeight: FontWeight.w500, fontSize: 12),
       ),
     );
   }
@@ -84,7 +83,7 @@ class FGBPTextFormField extends StatelessWidget {
   final bool? enableInteractiveSelection;
 
   const FGBPTextFormField({
-    Key? key,
+    super.key,
     this.label,
     this.hintText,
     this.controller,
@@ -97,7 +96,7 @@ class FGBPTextFormField extends StatelessWidget {
     this.enableInteractiveSelection,
     this.autofocus = false,
     this.isPassword = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -129,10 +128,7 @@ class FGBPTextFormField extends StatelessWidget {
         fillColor: FGBPColors.black,
         filled: true,
         hintStyle: FGBPTextTheme.regular20,
-        floatingLabelStyle: const TextStyle(
-            color: Color.fromRGBO(0, 0, 0, 0.4),
-            fontWeight: FontWeight.w500,
-            fontSize: 12),
+        floatingLabelStyle: const TextStyle(color: Color.fromRGBO(0, 0, 0, 0.4), fontWeight: FontWeight.w500, fontSize: 12),
       ),
       validator: validator,
     );

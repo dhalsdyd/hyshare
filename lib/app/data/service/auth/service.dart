@@ -1,28 +1,38 @@
 import 'dart:async';
+import 'dart:developer';
 
-import 'package:dio/dio.dart';
-import 'package:firebase_getx_boilerplate/app/data/service/auth/repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hyshare/app/core/util/permission.dart';
+import 'package:hyshare/app/data/models/user.dart' as app;
 
 class AuthService extends GetxService {
-  final AuthRepository repository;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
 
+  final Rx<UserCredential?> _tempToken = Rx(null);
   final Rx<String?> _accessToken = Rx(null);
-  final Rx<String?> _refreshToken = Rx(null);
+  final Rx<String?> _fcmToken = Rx(null);
+  final Rx<app.User?> user = Rx(null);
 
   /// google sign-in과 onboarding 과정이 완료되었을 경우 true
   bool get isAuthenticated => _accessToken.value != null;
 
   String? get accessToken => _accessToken.value;
-  String? get refreshToken => _refreshToken.value;
-
-  AuthService(this.repository);
+  String? get fcmToken => _fcmToken.value;
 
   Future<AuthService> init() async {
     _accessToken.value = await _storage.read(key: 'accessToken');
-    _refreshToken.value = await _storage.read(key: 'refreshToken');
+    _fcmToken.value = await _storage.read(key: 'fcmToken');
+    if (_accessToken.value != null) {
+      _firebaseFirestore.collection('users').doc(_accessToken.value).snapshots().listen((event) {
+        user.value = app.User.fromJson(event.data()!);
+      });
+    }
+
     return this;
   }
 
@@ -31,45 +41,107 @@ class AuthService extends GetxService {
     _accessToken.value = token;
   }
 
-  Future<void> _setRefreshToken(String token) async {
-    await _storage.write(key: 'refreshToken', value: token);
-    _refreshToken.value = token;
+  Future<void> _setFcmToken(String token) async {
+    _fcmToken.value = token;
+    await _storage.write(key: 'fcmToken', value: token);
   }
 
-  Future<String> registerUser(
-      String email, String password, String name, String birth) async {
+  Future<bool?> checkOnboarding(tempToken) async {
+    _tempToken.value = tempToken;
+    if (_tempToken.value == null) {
+      return null;
+    }
+    String uid = _tempToken.value!.user!.uid;
+    final DocumentSnapshot<Map<String, dynamic>> user = await _firebaseFirestore.collection('users').doc(uid).get();
+    if (!user.exists) {
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<void> getFcmToken() async {
+    bool isGranted = await PermissionHelper().requestNotification2();
+    if (!isGranted) {
+      return;
+    }
+
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.getToken().then((value) => _setFcmToken(value ?? ""));
+  }
+
+  Future<void> registerUser(String name, String account) async {
     try {
-      Map registerResult =
-          await repository.registerUser(email, password, name, birth);
-      print(registerResult);
-      if (registerResult["status"] == "success") {
-        return "회원가입에 성공했습니다. 메일을 확인해주세요.";
-      } else {
-        return "fail";
+      log('registerUser');
+
+      app.User user = app.User(
+          userId: _tempToken.value!.user!.uid,
+          rideId: "",
+          name: _tempToken.value!.user!.displayName!,
+          nickname: name,
+          photoUrl: _tempToken.value!.user!.photoURL!,
+          email: _tempToken.value!.user!.email!,
+          phoneNumber: _tempToken.value!.user!.phoneNumber ?? "",
+          paymentInfo: account,
+          warningCount: 0,
+          status: app.UserStatus.defaultStatus,
+          fcmTokens: []);
+
+      await _firebaseFirestore.collection('users').doc(user.userId).set(user.toJson());
+      await _setAccessToken(_tempToken.value!.user!.uid);
+      _tempToken.value = null;
+
+      await getFcmToken();
+      if (_fcmToken.value != null) {
+        _firebaseFirestore.collection('users').doc(_accessToken.value).update({
+          'fcmTokens': FieldValue.arrayUnion([_fcmToken.value])
+        });
       }
-    } on DioError catch (e) {
+
+      if (_accessToken.value != null) {
+        _firebaseFirestore.collection('users').doc(_accessToken.value).snapshots().listen((event) {
+          this.user.value = app.User.fromJson(event.data()!);
+        });
+      }
+    } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login() async {
     try {
-      Map loginResult = await repository.login(email, password);
-      print(loginResult);
-      _setAccessToken(loginResult["data"]["accessToken"]);
-      _setRefreshToken(loginResult["data"]["refreshToken"]);
-    } on DioError catch (e) {
-      print(e.response!.statusCode.toString());
+      await _setAccessToken(_tempToken.value!.user!.uid);
+      _tempToken.value = null;
+
+      if (_fcmToken.value == null || _fcmToken.value!.isEmpty) {
+        await getFcmToken();
+      }
+
+      if (_fcmToken.value != null) {
+        _firebaseFirestore.collection('users').doc(_accessToken.value).update({
+          'fcmTokens': FieldValue.arrayUnion([_fcmToken.value])
+        });
+      }
+
+      if (_accessToken.value != null) {
+        _firebaseFirestore.collection('users').doc(_accessToken.value).snapshots().listen((event) {
+          log(event.data().toString());
+          user.value = app.User.fromJson(event.data()!);
+        });
+      }
+    } catch (e) {
       rethrow;
     }
   }
-
-  Future<void> refreshAcessToken() async {}
 
   Future<void> logout() async {
     _accessToken.value = null;
-    _refreshToken.value = null;
     await _storage.delete(key: 'accessToken');
-    await _storage.delete(key: 'refreshToken');
+    await FirebaseAuth.instance.signOut();
+    try {
+      await _firebaseFirestore.collection('users').doc(_accessToken.value).update({
+        'fcmTokens': FieldValue.arrayRemove([_fcmToken.value])
+      });
+    } catch (_) {}
   }
 }
