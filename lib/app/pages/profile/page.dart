@@ -118,6 +118,35 @@ class ProfilePage extends GetView<ProfilePageController> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "알림 설정",
+                          style: FGBPTextTheme.bold20.copyWith(color: FGBPColors.mainColor),
+                        ),
+                        const SizedBox(width: 16),
+                        Obx(
+                          () => Switch(
+                            value: controller.allowNotification.value,
+                            onChanged: (value) {
+                              controller.allowNotification.value = value;
+                              controller.updateNotification();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Obx(() => Text(
+                          controller.authService.fcmToken != null && controller.authService.fcmToken!.isNotEmpty ? "활성화" : "비활성화",
+                          style: FGBPTextTheme.medium12.copyWith(
+                              color:
+                                  controller.authService.fcmToken != null && controller.authService.fcmToken!.isNotEmpty ? Colors.green : Colors.red),
+                        )),
+
                     // const SizedBox(height: 16),
                     // Text(
                     //   "경고 횟수",

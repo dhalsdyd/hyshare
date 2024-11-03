@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:hyshare/app/core/util/google_login.dart';
 import 'package:hyshare/app/data/service/auth/service.dart';
 import 'package:hyshare/app/routes/route.dart';
+import 'package:hyshare/app/widgets/snackbar.dart';
 
 class LoginPageController extends GetxController with StateMixin {
   static LoginPageController get to => Get.find<LoginPageController>(); // add this line
@@ -79,15 +80,16 @@ class LoginPageController extends GetxController with StateMixin {
     final GoogleAuthProvider provider = GoogleAuthProvider().setCustomParameters({'prompt': 'select_account'});
     UserCredential userCredential = await FirebaseAuth.instance.signInWithPopup(provider);
 
-    // if (userCredential.user == null || userCredential.user!.email!.contains('hanyang.ac.kr') == false) {
-    //   FGBPSnackBar.open("한양대학교 이메일로 로그인해주세요.");
-    //   return;
-    // }
+    if (userCredential.user == null || userCredential.user!.email!.contains('hanyang.ac.kr') == false) {
+      FGBPSnackBar.open("한양대학교 이메일로 로그인해주세요.");
+      return;
+    }
 
     tempToken.value = userCredential;
     bool? check = await authService.checkOnboarding(tempToken.value);
     if (check == null) {
       change(null, status: RxStatus.error('로그인에 실패했습니다.'));
+      FGBPErrorSnackBar().open('다시 시도해주세요.');
       return;
     }
     if (check) {

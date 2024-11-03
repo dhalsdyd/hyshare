@@ -70,23 +70,20 @@ class ChatItem extends StatelessWidget {
                 ),
               ),
             ),
+            if (copy)
+              Column(
+                children: [
+                  const SizedBox(height: 4),
+                  GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: text));
+                        FGBPSnackBar.open('복사되었습니다.');
+                      },
+                      child: Text('복사하기', style: FGBPTextTheme.medium12.copyWith(color: color))),
+                ],
+              ),
           ],
         ),
-        if (copy)
-          Row(
-            children: [
-              const SizedBox(width: 4),
-              GestureDetector(
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: text));
-                    FGBPSnackBar.open('복사되었습니다.');
-                  },
-                  child: Icon(
-                    Icons.copy,
-                    color: color,
-                  )),
-            ],
-          )
       ],
     );
   }

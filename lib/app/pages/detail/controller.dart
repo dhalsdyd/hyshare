@@ -119,6 +119,11 @@ class DetailPageController extends GetxController with StateMixin {
       FirebaseFirestore.instance.collection('chats').doc(ride.rideId).update({
         'users': FieldValue.arrayRemove([user.toJson()])
       });
+    } else if (ride.status == RideStatus.completed) {
+      await FirebaseFirestore.instance.collection("users").doc(authService.accessToken).update({
+        "rideId": "",
+        "status": "default",
+      });
     }
 
     FirebaseFirestore.instance.collection('chats').doc(ride.rideId).collection('messages').add({

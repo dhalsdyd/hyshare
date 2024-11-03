@@ -36,10 +36,10 @@ class GoogleSignHelper {
       return null;
     }
 
-    // if (!googleAccount.email.contains("hanyang.ac.kr")) {
-    //   FGBPSnackBar.open("한양대학교 이메일로 로그인해주세요.");
-    //   return null;
-    // }
+    if (!googleAccount.email.contains("hanyang.ac.kr")) {
+      FGBPSnackBar.open("한양대학교 이메일로 로그인해주세요.");
+      return null;
+    }
 
     final GoogleSignInAuthentication googleAuth = await googleAccount.authentication;
 

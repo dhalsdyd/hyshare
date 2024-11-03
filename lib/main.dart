@@ -7,7 +7,6 @@ import 'package:hyshare/app/routes/route.dart';
 import 'package:hyshare/app/translation/translation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-//import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:hyshare/firebase_options.dart';
 

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:hyshare/app/data/models/chat.dart';
 import 'package:hyshare/app/data/models/ride.dart';
@@ -33,11 +34,12 @@ class AddPageController extends GetxController with StateMixin {
   Rx<int> minute = DateTime.now().minute.obs;
 
   Rx<int> maxParticipants = 4.obs;
-  Rx<int> cost = 10.obs;
+  Rx<int> cost = 10000.obs;
+  TextEditingController costController = TextEditingController();
 
   String get formattedDate =>
       '${selectedDate.value.year}년 ${selectedDate.value.month}월 ${selectedDate.value.day}일 ${selectedDate.value.hour.toString().padLeft(2, "0")}:${selectedDate.value.minute.toString().padLeft(2, "0")}';
-  String get commaCost => (cost.value * 1000).toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
+  String get commaCost => (cost.value).toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
 
   void setDeparture(String value) {
     departure.value = value;
@@ -79,7 +81,7 @@ class AddPageController extends GetxController with StateMixin {
       destination: destination.value,
       currentPassanger: 1,
       maxPassanger: maxParticipants.value,
-      estimatedCostPerPassanger: cost.value * 1000,
+      estimatedCostPerPassanger: cost.value,
       departureTime: selectedDate.value,
       paymentMethod: "계좌 이체",
       status: RideStatus.hosting,
@@ -121,5 +123,13 @@ class AddPageController extends GetxController with StateMixin {
   void onInit() {
     super.onInit();
     change(null, status: RxStatus.success());
+    costController.text = cost.value.toString();
+    costController.addListener(() {
+      if (costController.text.isEmpty) {
+        cost.value = 0;
+      } else {
+        cost.value = int.parse(costController.text);
+      }
+    });
   }
 }

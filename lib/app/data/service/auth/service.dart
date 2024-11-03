@@ -43,6 +43,7 @@ class AuthService extends GetxService {
 
   Future<void> _setFcmToken(String token) async {
     _fcmToken.value = token;
+    log('fcmToken: $token');
     await _storage.write(key: 'fcmToken', value: token);
   }
 
@@ -70,6 +71,11 @@ class AuthService extends GetxService {
     await messaging.getToken().then((value) => _setFcmToken(value ?? ""));
   }
 
+  Future<void> removeFcmToken() async {
+    await _storage.delete(key: 'fcmToken');
+    _fcmToken.value = null;
+  }
+
   Future<void> registerUser(String name, String account) async {
     try {
       log('registerUser');
@@ -92,11 +98,6 @@ class AuthService extends GetxService {
       _tempToken.value = null;
 
       await getFcmToken();
-      if (_fcmToken.value != null) {
-        _firebaseFirestore.collection('users').doc(_accessToken.value).update({
-          'fcmTokens': FieldValue.arrayUnion([_fcmToken.value])
-        });
-      }
 
       if (_accessToken.value != null) {
         _firebaseFirestore.collection('users').doc(_accessToken.value).snapshots().listen((event) {
@@ -115,12 +116,6 @@ class AuthService extends GetxService {
 
       if (_fcmToken.value == null || _fcmToken.value!.isEmpty) {
         await getFcmToken();
-      }
-
-      if (_fcmToken.value != null) {
-        _firebaseFirestore.collection('users').doc(_accessToken.value).update({
-          'fcmTokens': FieldValue.arrayUnion([_fcmToken.value])
-        });
       }
 
       if (_accessToken.value != null) {

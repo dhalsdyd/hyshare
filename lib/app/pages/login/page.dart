@@ -24,7 +24,7 @@ class LoginPage extends GetView<LoginPageController> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset("assets/images/hanyang1.png"),
+                  Image.asset("assets/images/app_icon.png"),
                   const SizedBox(height: 8),
                   const FGBPText("분담하는 요금, 나누는 즐거움", style: FGBPTextTheme.bold20),
                 ],

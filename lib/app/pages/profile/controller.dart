@@ -13,6 +13,7 @@ class ProfilePageController extends GetxController with StateMixin {
   AuthService authService = Get.find<AuthService>();
 
   Rx<User?> user = Rx<User?>(null);
+  Rx<bool> allowNotification = Rx<bool>(true);
 
   final TextEditingController accountController = TextEditingController();
 
@@ -35,12 +36,21 @@ class ProfilePageController extends GetxController with StateMixin {
     change(null, status: RxStatus.success());
   }
 
+  Future<void> updateNotification() async {
+    if (allowNotification.value) {
+      await authService.getFcmToken();
+    } else {
+      await authService.removeFcmToken();
+    }
+  }
+
   @override
   void onInit() async {
     super.onInit();
     change(null, status: RxStatus.loading());
     final data = await FirebaseFirestore.instance.collection('users').doc(authService.accessToken).get();
     user.value = User.fromJson(data.data()!);
+    allowNotification.value = authService.fcmToken != null && authService.fcmToken!.isNotEmpty;
     change(null, status: RxStatus.success());
   }
 }
